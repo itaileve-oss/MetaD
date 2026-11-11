@@ -29,6 +29,21 @@ asymmetric, inhibitor-stabilized state (PDB 7JRA, ligand removed). See
 | 5 | `src/saltbridge_cv.py` | Salt-bridge switch CV on trajectories (PBC-safe) |
 | 5 | `analysis/plot_fes_metad_v2.py` | FES plot with state boxes and visited-cell masking |
 
+## Quick start with Docker (everything preinstalled)
+
+```bash
+docker pull ghcr.io/itaileve-oss/metad:latest
+docker run --gpus all -it -v $PWD:/workspace ghcr.io/itaileve-oss/metad:latest
+```
+
+The image is built automatically from this repo by GitHub Actions. It contains OpenMM 8.4
+(CUDA 12.6), PDBFixer, mdtraj, PLUMED with `openmm-plumed`, and this repository in
+`/opt/metad`, with the environment at `/opt/micromamba/envs/tnfmd`. It needs an NVIDIA driver
+supporting CUDA ≥ 12.6.
+
+**On vast.ai:** create a template with image `ghcr.io/itaileve-oss/metad:latest` (launch mode
+SSH), start an instance, put your inputs in `/workspace`, and run the scripts. No setup needed.
+
 ## Requirements
 
 - OpenMM ≥ 8.1 (CUDA), PDBFixer, `openmm-plumed`, PLUMED 2.9
