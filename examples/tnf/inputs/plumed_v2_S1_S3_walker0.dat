@@ -1,0 +1,51 @@
+# Well-tempered metadynamics on the three CVs of
+# bioRxiv 10.1101/2025.11.28.690881 (their method was meta-eABF; PLUMED's DRR
+# module was unavailable here, so this is WT-metaD on the same CVs -- the
+# deviation must be stated whenever these free energies are compared).
+UNITS LENGTH=nm ENERGY=kj/mol TIME=ps
+RESTART
+# Reassemble each PROTEIN CHAIN before any CoM is taken.
+# One ENTITY per chain, NOT the whole system: applying WHOLEMOLECULES to all
+# ~69k atoms (incl. ~62k waters) cost an 8x slowdown (631 -> 78 ns/day), and
+# water needs no reassembly. Each entity must be one connected molecule.
+WHOLEMOLECULES ENTITY0=1-2378 ENTITY1=2379-4756 ENTITY2=4757-7134
+
+S1_a: COM ATOMS=5503,5510,5529,6599,6619,6636
+S1_c: COM ATOMS=747,754,773,1843,1863,1880
+S1: DISTANCE ATOMS=S1_a,S1_c
+
+S2_a: COM ATOMS=6124,6143,6162,6173,6183,6202,6495,6510,6529,6550,6569,6576
+S2_c: COM ATOMS=853,864,881,897,916,1725,1739,1754,1773,2249,2265,2286
+S2: DISTANCE ATOMS=S2_a,S2_c
+
+S3_a: COM ATOMS=5827,5846,5865,6183,6202,6224
+S3_c: COM ATOMS=916,936,958,1680,1704,1725
+S3: DISTANCE ATOMS=S3_a,S3_c
+
+METAD ...
+   LABEL=metad
+   ARG=S1,S3
+   SIGMA=0.025,0.015
+   HEIGHT=1.2
+   BIASFACTOR=15.0
+   PACE=1000
+   TEMP=310
+   GRID_MIN=1.4,0.5
+   GRID_MAX=3.0999999999999996,2.1
+   CALC_RCT
+   WALKERS_N=2
+   WALKERS_ID=0
+   WALKERS_DIR=../walkers_shared
+   WALKERS_RSTRIDE=100
+   FILE=HILLS
+... METAD
+
+# Keep sampling inside the paper's ranges; without walls the bias wanders into
+# unphysical territory and wastes the budget.
+lw_S1: LOWER_WALLS ARG=S1 AT=1.700 KAPPA=2000.0
+uw_S1: UPPER_WALLS ARG=S1 AT=2.800 KAPPA=2000.0
+lw_S3: LOWER_WALLS ARG=S3 AT=0.800 KAPPA=2000.0
+uw_S3: UPPER_WALLS ARG=S3 AT=1.800 KAPPA=2000.0
+
+PRINT ARG=S1,S2,S3,metad.bias STRIDE=2500 FILE=COLVAR
+
